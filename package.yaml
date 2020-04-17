@@ -24,6 +24,15 @@ dependencies:
 
 library:
   source-dirs: src
+  build-tools:
+  - happy
+  - alex
+  dependencies:
+  - array
+  - ghc-boot
+  - bytestring
+  - containers
+  - ghc
 
 executables:
   shash-exe:

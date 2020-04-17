@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8b260c6cc03192262cb84232e064c2cfb36d043ad7e5ea90922ee91a37dbc367
+-- hash: 5d1a60d8ecb855591fdea1cd652c283ad53ffc1f80727c39e0939a5cfedb499d
 
 name:           shash
 version:        0.1.0.0
@@ -27,13 +27,24 @@ source-repository head
 
 library
   exposed-modules:
+      FLAC
+      Lexer
       Lib
+      Parser
   other-modules:
       Paths_shash
   hs-source-dirs:
       src
+  build-tools:
+      alex
+    , happy
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , ghc
+    , ghc-boot
   default-language: Haskell2010
 
 executable shash-exe
