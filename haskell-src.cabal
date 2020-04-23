@@ -37,6 +37,7 @@ library
         Language.Haskell.ParseUtils
         Language.FLAC.Syntax
         Language.FLAC.Proof
+        Language.FLAC.Parser
 
   build-depends: base    >= 4.3 && < 4.14
                , syb     >= 0.1 && < 0.8

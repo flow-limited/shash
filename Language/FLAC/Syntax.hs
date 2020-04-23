@@ -5,6 +5,7 @@ module Language.FLAC.Syntax where
 data Principal = Primitive String | Top | Bottom
   | Integrity Principal | Confidentiality Principal
   | And Principal Principal | Or Principal Principal
+  deriving (Show, Eq)
 
 data Type = ActsFor Principal Principal | Unit | Plus Type Type | Times Type Type
   | Fn Type Principal Type | Says Principal Type
