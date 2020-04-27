@@ -46,14 +46,14 @@ stringP = sequenceA . map charP
     -- runFLACParser principalValue "Top" (works?)
     -- runFLACParser principalValue "Bottom" (works?)
 
-principalValue :: Parser Principal
+principalValue :: Parser Prin
 principalValue = principalTop <|> principalBottom
 
-principalTop :: Parser Principal
+principalTop :: Parser Prin
 principalTop = (\_ -> Top) <$> stringP "Top"
 
-principalBottom :: Parser Principal
-principalBottom = (\_ -> Bottom) <$> stringP "Bottom"
+principalBottom :: Parser Prin
+principalBottom = (\_ -> Bot) <$> stringP "Bottom"
 
 
 -- For setup debugging

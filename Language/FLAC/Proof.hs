@@ -12,7 +12,7 @@ data And a b = And a b
 data Or a b = Or a b
 data Voice a = Voice a
 
-data CActsFor p q = CActsFor p q
+data Delegation p q = Delegation p q
 
 data ActsFor (ctx :: [*]) a b where
   ForBot :: a -> ActsFor ctx a Bottom
@@ -30,4 +30,4 @@ data ActsFor (ctx :: [*]) a b where
   DisjR2 :: ActsFor ctx p b -> ActsFor ctx p (Or a b)
   Trans :: ActsFor ctx a b -> ActsFor ctx b c -> ActsFor ctx a c
 --  TransVoice :: ActsFor ctx a b -> ActsFor ctx b c -> ActsFor ctx pc (Voice (C c)) -> ActsFor ctx a c
-  Assume :: HMember (CActsFor p q) ctx 'True => ActsFor ctx (Voice (C p)) (Voice (C q)) -> ActsFor ctx p q
+  Assume :: HMember (Delegation p q) ctx 'True => ActsFor ctx (Voice (C p)) (Voice (C q)) -> ActsFor ctx p q

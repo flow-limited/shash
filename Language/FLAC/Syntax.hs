@@ -2,38 +2,36 @@
 
 module Language.FLAC.Syntax where
 
-data Principal = Primitive String | Top | Bottom
-  | Integrity Principal | Confidentiality Principal
-  | And Principal Principal | Or Principal Principal
+data Prin = Name String | PVar String | Top | Bot
+  | Integ Prin | Conf Prin
+  | Conj Prin Prin | Disj Prin Prin
+  | Voice Prin | Eye Prin
   deriving (Show, Eq)
 
-data Type = ActsFor Principal Principal | Unit | Plus Type Type | Times Type Type
-  | Fn Type Principal Type | Says Principal Type
-  | TVar String | Forall String Principal Type
+data Type = ActsFor Prin Prin | Unit | Plus Type Type | Times Type Type
+  | Fn Type Prin Type | Says Prin Type
+  | TVar String | Forall String Prin Type
 
-data Value = VUnit | VPair Value Value | VActsFor Principal Principal
-  | VProtect Principal Value | VInject Int Value
-  | Lambda String Type Principal Exp
-  | LAMBDA String Principal Exp
-
-data Exp = Var String | Val Value | App Exp Exp | Pair Exp Exp
-  | Protect Principal Exp | TApp Exp Type | Project Int Exp | Inject Int Exp
+data Exp = EUnit | Var String | EActsFor Prin Prin | App Exp Exp | Pair Exp Exp
+  | Protect Prin Exp | TApp Exp Type | Project Int Exp | Inject Int Exp
   | Case Exp String Exp String Exp | Bind String Exp Exp | Assume Exp Exp
+  | Lambda String Type Prin Exp
+  | LAMBDA String Prin Exp
 
-(^→), (^←) :: Principal -> Principal
-(^→) = Confidentiality
-(^←) = Integrity
+(^→), (^←) :: Prin -> Prin
+(^→) = Conf
+(^←) = Integ
 
-(∧), (∨) :: Principal -> Principal -> Principal
-(∧) = And
-(∨) = Or
+(∧), (∨) :: Prin -> Prin -> Prin
+(∧) = Conj
+(∨) = Disj
 
-(≽) :: Principal -> Principal -> Type
+(≽) :: Prin -> Prin -> Type
 (≽) = ActsFor
 
 (+), (×) :: Type -> Type -> Type
 (+) = Plus
 (×) = Times
 
-says :: Principal -> Type -> Type
+says :: Prin -> Type -> Type
 says = Says
