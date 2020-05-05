@@ -38,12 +38,14 @@ library
         Language.FLAC.Syntax
         Language.FLAC.Proof
         Language.FLAC.Parser
+        Language.FLAC.Proof.ActsFor
 
   build-depends: base    >= 4.3 && < 4.14
                , syb     >= 0.1 && < 0.8
                , pretty  >= 1.0.1.2 && < 1.2
                , array   >= 0.3 && < 0.6
                , HList   >= 0.5 && < 0.6
+               , type-level-sets >= 0.8 && < 0.9
 
   if !impl(ghc >= 8.0)
     build-depends: semigroups == 0.18.*, fail == 4.9.*
