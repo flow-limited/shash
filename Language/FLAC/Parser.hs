@@ -41,13 +41,22 @@ charP x = Parser f
 stringP :: String -> Parser String
 stringP = sequenceA . map charP
 
+-- Parses characters that meet a condition
+spanP :: (Char -> Bool) -> Parser String
+spanP f =
+  Parser $ \input ->
+    let (token, rest) = span f input
+     in Just (rest, token)
+
 -- Parses Principals
 -- In GHCI: runFLACParser principalValue "inputString"
-    -- runFLACParser principalValue "Top" (works?)
-    -- runFLACParser principalValue "Bottom" (works?)
+    -- runFLACParser principalValue "Top" 
+    -- runFLACParser principalValue "Bottom" 
+    -- runFLACParser principalValue "Name \"name1\""
 
 principalValue :: Parser Prin
-principalValue = principalTop <|> principalBottom
+principalValue = principalTop <|> principalBottom <|> principalName <|> principalPVar <|> principalInteg 
+  <|> principalConf <|> principalVoice <|> principalEye
 
 principalTop :: Parser Prin
 principalTop = (\_ -> Top) <$> stringP "Top"
@@ -55,6 +64,37 @@ principalTop = (\_ -> Top) <$> stringP "Top"
 principalBottom :: Parser Prin
 principalBottom = (\_ -> Bot) <$> stringP "Bottom"
 
+principalName :: Parser Prin 
+principalName = Name <$> (stringP "Name \"" *> spanP (/= '"') <* charP '"')
+
+principalPVar :: Parser Prin 
+principalPVar = PVar <$> (stringP "PVar \"" *> spanP (/= '"') <* charP '"')
+
+principalInteg :: Parser Prin
+principalInteg = Integ <$> (stringP "Integ " *> principalValue)
+
+principalConf :: Parser Prin
+principalConf = Conf <$> (stringP "Conf " *> principalValue) 
+
+principalVoice :: Parser Prin
+principalVoice = Voice <$> (stringP "Voice " *> principalValue) 
+
+principalEye :: Parser Prin
+principalEye = Eye <$> (stringP "Eye " *> principalValue) 
+
+principalConj :: Parser Prin
+principalConj = undefined 
+
+principalDisj :: Parser Prin
+principalDisj = undefined 
+
+-- Parses Types
+
+-- typeValue :: Parser Type 
+-- typeValue = typeUnit 
+
+-- typeUnit :: Parser Type 
+-- typeUnit = (\_ -> Unit) <$> stringP "Unit"
 
 -- For setup debugging
 parserMain :: IO ()
