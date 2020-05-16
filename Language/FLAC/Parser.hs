@@ -52,11 +52,13 @@ spanP f =
 -- In GHCI: runFLACParser principalValue "inputString"
     -- runFLACParser principalValue "Top" 
     -- runFLACParser principalValue "Bottom" 
-    -- runFLACParser principalValue "Name \"name1\""
+    -- runFLACParser principalValue "Name \"name1\"" 
+-- ToDo: deal with whitespace
+-- Use many in GHCI: :m +Control.Applicative 
 
 principalValue :: Parser Prin
 principalValue = principalTop <|> principalBottom <|> principalName <|> principalPVar <|> principalInteg 
-  <|> principalConf <|> principalVoice <|> principalEye
+  <|> principalConf <|> principalVoice <|> principalEye <|> principalConj <|> principalDisj
 
 principalTop :: Parser Prin
 principalTop = (\_ -> Top) <$> stringP "Top"
@@ -83,10 +85,11 @@ principalEye :: Parser Prin
 principalEye = Eye <$> (stringP "Eye " *> principalValue) 
 
 principalConj :: Parser Prin
-principalConj = undefined 
+principalConj = (\_ p1 _ p2 -> Conj p1 p2) <$> stringP "Conj " <*> principalValue <*> charP ' ' <*> principalValue
 
 principalDisj :: Parser Prin
-principalDisj = undefined 
+principalDisj = (\_ p1 _ p2 -> Disj p1 p2) <$> stringP "Disj " <*> principalValue <*> charP ' ' <*> principalValue
+
 
 -- Parses Types
 
