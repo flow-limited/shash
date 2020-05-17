@@ -44,10 +44,10 @@ data FLAC
   UNPAIR2 :: FLAC dx tx pc e ('Times t1 t2) -> FLAC dx tx pc ('Project2 e) t2
   INJ1 :: FLAC dx tx pc e t1 -> FLAC dx tx pc ('Inject1 e) ('Plus t1 t2)
   INJ2 :: FLAC dx tx pc e t2 -> FLAC dx tx pc ('Inject2 e) ('Plus t1 t2)
-  CASE :: (tx1 ~ ((x ':-> t1) ': tx), tx2 ~ ((x ':-> t2) ': tx)) =>
+  CASE :: (tx1 ~ ((x ':-> t1) ': tx), tx2 ~ ((y ':-> t2) ': tx)) =>
     FLAC dx tx pc e ('Plus t1 t2) -> FlowsToType dx pc t ->
     FLAC dx tx1 pc e1 t -> FLAC dx tx2 pc e2 t ->
-    FLAC dx tx pc ('Case e x e1 x e2) t
+    FLAC dx tx pc ('Case e x e1 y e2) t
   UNITM :: FLAC dx tx pc e t -> FlowsTo dx pc l -> FLAC dx tx pc ('Protect l e) ('Says l t)
   -- do we end up needing this?
   SEALED :: FLAC dx tx pc ('Var v) t -> FLAC dx tx pc ('Protect l ('Var v)) ('Says l t)
