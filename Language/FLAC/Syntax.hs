@@ -16,7 +16,7 @@ data Type = ActsFor Prin Prin | Unit | Plus Type Type | Times Type Type
 
 data Exp = EUnit | Var Symbol | EActsFor Prin Prin | App Exp Exp | Pair Exp Exp
   | Protect Prin Exp | TApp Exp Type | Project1 Exp | Project2 Exp | Inject1 Exp | Inject2 Exp
-  | Case Exp String Exp String Exp | Bind String Exp Exp | Assume Exp Exp
+  | Case Exp Symbol Exp Symbol Exp | Bind Symbol Exp Exp | Assume Exp Exp
   | Lambda Symbol Type Prin Exp
   | LAMBDA Symbol Prin Exp
 

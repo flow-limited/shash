@@ -23,3 +23,10 @@ data ActsFor (ctx :: [Delegation]) (a :: Prin) (b :: Prin) where
 --  Assume :: HMember (Delegation p q) ctx 'True => ActsFor ctx ('Voice ('Conf p)) ('Voice ('Conf q)) -> ActsFor ctx p q
 
 type FlowsTo (ctx :: [Delegation]) (a :: Prin) (b :: Prin) = (ActsFor ctx ('Conf b) ('Conf a), ActsFor ctx ('Integ a) ('Integ b))
+
+data FlowsToType (ctx :: [Delegation]) (a :: Prin) (t :: Type) where
+  PUNIT :: FlowsToType dx l 'Unit
+  PPAIR :: FlowsToType dx l a -> FlowsToType dx l b -> FlowsToType dx l ('Times a b)
+  PFUN :: FlowsToType dx l t2 -> FlowsTo dx l pc' -> FlowsToType dx l ('Fn t1 pc' t2)
+  PTFUN :: FlowsToType dx l t -> FlowsTo dx l pc' -> FlowsToType dx l ('Forall x pc' t)
+  PLBL :: FlowsTo dx l l' -> FlowsToType dx l ('Says l t)

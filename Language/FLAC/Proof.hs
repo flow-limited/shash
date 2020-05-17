@@ -20,6 +20,8 @@ type family Subst (t :: Type) (x :: Symbol) (t' :: Type) :: Type where
   Subst ('Says p t) x t' = 'Says p (Subst t x t')
   Subst t _ _ = t
 
+type family Lub (p :: Prin) (q :: Prin) :: Prin
+
 data FLAC
   (delctx :: [Delegation])
   (typctx :: [Typed])
@@ -42,13 +44,16 @@ data FLAC
   UNPAIR2 :: FLAC dx tx pc e ('Times t1 t2) -> FLAC dx tx pc ('Project2 e) t2
   INJ1 :: FLAC dx tx pc e t1 -> FLAC dx tx pc ('Inject1 e) ('Plus t1 t2)
   INJ2 :: FLAC dx tx pc e t2 -> FLAC dx tx pc ('Inject2 e) ('Plus t1 t2)
-  -- wait what? pc flows to a type?
-  -- CASE :: FLAC dx tx pc e ('Plus t1 t2) -> FlowsTo pc t
+  CASE :: (tx1 ~ ((x ':-> t1) ': tx), tx2 ~ ((x ':-> t2) ': tx)) =>
+    FLAC dx tx pc e ('Plus t1 t2) -> FlowsToType dx pc t ->
+    FLAC dx tx1 pc e1 t -> FLAC dx tx2 pc e2 t ->
+    FLAC dx tx pc ('Case e x e1 x e2) t
   UNITM :: FLAC dx tx pc e t -> FlowsTo dx pc l -> FLAC dx tx pc ('Protect l e) ('Says l t)
   -- do we end up needing this?
   SEALED :: FLAC dx tx pc ('Var v) t -> FLAC dx tx pc ('Protect l ('Var v)) ('Says l t)
-  -- also needs flowsto type clarification
-  -- BINDM :: FLAC dx tx pc e ('Says l t') ->
+  BINDM :: tx' ~ ((x ':-> t') ': tx) =>
+    FLAC dx tx pc e ('Says l t') -> FLAC dx tx' (Lub pc l) e' t ->
+    FlowsToType dx (Lub pc l) t -> FLAC dx tx pc ('Bind x e e') t
   ASSUME :: dx' ~ ('Delegation p q ': dx) => -- is this what goes into dx?
     FLAC dx tx pc e ('ActsFor p q)
     -> ActsFor dx pc ('Voice q)
