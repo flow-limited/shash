@@ -22,8 +22,8 @@ pair = PAIR VAR VAR
 inj :: FLAC '[] '[] 'Bot ('Inject2 'EUnit) ('Plus ('Says 'Top 'Unit) 'Unit)
 inj = INJ2 UNIT
 
-cse :: FLAC '[] '[] 'Bot ('Case ('Inject1 'EUnit) "k" 'EUnit "z" 'EUnit) 'Unit
-cse = CASE (INJ1 UNIT) PUNIT UNIT UNIT
+case_ :: FLAC '[] '[] 'Bot ('Case ('Inject1 'EUnit) "k" 'EUnit "z" 'EUnit) 'Unit
+case_ = CASE (INJ1 UNIT) PUNIT UNIT UNIT
 
 main :: IO ()
 main = return ()
