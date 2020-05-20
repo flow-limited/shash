@@ -2,28 +2,29 @@
 
 module Main where
 
-import Language.FLAC.Syntax
+import Language.FLAC.Syntax hiding (Exp(..))
 import Language.FLAC.Proof
 import Language.FLAC.Proof.ActsFor
+import Data.Proxy
 import Data.Type.Map hiding (Var)
 
-unit :: FLAC '[] '[] 'Bot 'EUnit 'Unit
-unit = UNIT
+unit :: FLAC '[] '[] 'Bot 'Unit
+unit = EUnit
 
-var :: FLAC '[] '["x" ':-> 'TVar "a"] 'Bot ('Var "x") ('TVar "a")
-var = VAR
+var :: FLAC '[] '["x" ':-> 'TVar "a"] 'Bot ('TVar "a")
+var = Var (Proxy @"x")
 
-lam :: FLAC '[] '[] 'Top ('Lambda "x" ('TVar "a") 'Top 'EUnit) ('Fn ('TVar "a") 'Top 'Unit)
-lam = LAM (UNIT @'[] @'["x" ':-> 'TVar "a"])
+lam :: FLAC '[] '[] 'Top ('Fn ('TVar "a") 'Top 'Unit)
+lam = Lambda (Proxy @"x") Proxy Proxy (EUnit @'[] @'["x" ':-> 'TVar "a"])
 
-pair :: FLAC '[] '["x" ':-> 'Says 'Top 'Unit, "y" ':-> 'Unit] 'Bot ('Pair ('Var "x") ('Var "y")) ('Times ('Says 'Top 'Unit) 'Unit)
-pair = PAIR VAR VAR
+pair :: FLAC '[] '["x" ':-> 'Says 'Top 'Unit, "y" ':-> 'Unit] 'Bot ('Times ('Says 'Top 'Unit) 'Unit)
+pair = Pair (Var $ Proxy @"x") (Var $ Proxy @"y")
 
-inj :: FLAC '[] '[] 'Bot ('Inject2 'EUnit) ('Plus ('Says 'Top 'Unit) 'Unit)
-inj = INJ2 UNIT
+inj :: FLAC '[] '[] 'Bot ('Plus ('Says 'Top 'Unit) 'Unit)
+inj = Inject2 EUnit
 
-case_ :: FLAC '[] '[] 'Bot ('Case ('Inject1 'EUnit) "k" 'EUnit "z" 'EUnit) 'Unit
-case_ = CASE (INJ1 UNIT) PUNIT UNIT UNIT
+case_ :: FLAC '[] '[] 'Bot 'Unit
+case_ = Case (Inject1 EUnit) PUNIT Proxy EUnit Proxy EUnit
 
 main :: IO ()
 main = return ()
