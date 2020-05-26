@@ -5,22 +5,143 @@
 
 packages:
 - completed:
-    hackage: HList-0.5.0.0@sha256:7d7a0bee8d01a7e0e10bf96c5214a21bebae3ecfc02d14fc13bf75458b38ac43,7137
-    pantry-tree:
-      size: 5718
-      sha256: 2881dd9fe6ee24dad62ecd68be6d98e834823d21b659f4ff0de87475e33371f1
-  original:
-    hackage: HList-0.5.0.0
-- completed:
     hackage: type-level-sets-0.8.9.0@sha256:e29f4045b68e46e0f88153c63f48fb026917eeacafd9b81fc059417a85e68031,3123
     pantry-tree:
       size: 382
       sha256: e7b4e38017e1231b70c511f95a057692a43366408137639da510b25155662a09
   original:
     hackage: type-level-sets-0.8.9.0
-snapshots:
 - completed:
-    size: 509471
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/12/26.yaml
-    sha256: 95f014df58d0679b1c4a2b7bf2b652b61da8d30de5f571abb0d59015ef678646
-  original: lts-12.26
+    cabal-file:
+      size: 7428
+      sha256: b582f3b0401bdae3ff30b3eaede251a307c69904bda490877b4d2f6ec9290843
+    name: singletons
+    version: '2.8'
+    git: https://github.com/goldfirere/singletons
+    pantry-tree:
+      size: 26710
+      sha256: f98ae366c771288d3063ff74be776567df48863871e43a09028aa0118d6f15f7
+    commit: 5f8f2b418989ba0109e965f634f0cf7a850f9191
+  original:
+    git: https://github.com/goldfirere/singletons
+    commit: 5f8f2b418989ba0109e965f634f0cf7a850f9191
+- completed:
+    hackage: happy-1.19.12@sha256:acc67bfbf3af87892766781dd064c9447181ea81269a7a1e5fc9ace4a8fa4768,5691
+    pantry-tree:
+      size: 8693
+      sha256: 91502601a560862a5b90d776c0bd58bc2779ba5b7945c984817eaa3b9ca64564
+  original:
+    hackage: happy-1.19.12
+- completed:
+    hackage: syb-0.7.1@sha256:8d37b1e4d04a9aa8512dc6c2a06e02afc015a2fd3e735bdfeeacb5e2e853323c,2462
+    pantry-tree:
+      size: 3396
+      sha256: efe0ac2f5d5a3c34125c2dd665521a626237f49aa8fa289bfeeabe951b8a30e0
+  original:
+    hackage: syb-0.7.1
+- completed:
+    cabal-file:
+      size: 3577
+      sha256: 625e57abf6edd66a75f05d162f5c00c2bafdec41498c5d2c48fcaf76fc437df6
+    name: th-desugar
+    version: '1.12'
+    git: https://github.com/goldfirere/th-desugar
+    pantry-tree:
+      size: 1931
+      sha256: 534820be983bf8cf6fcbcce310572c04a8edc8f92488d936bce53227c989bde2
+    commit: 5eef50aad9a7db9ad284a427b791891398304fa8
+  original:
+    git: https://github.com/goldfirere/th-desugar
+    commit: 5eef50aad9a7db9ad284a427b791891398304fa8
+- completed:
+    hackage: fail-4.9.0.0@sha256:35d1ee29364447c1b7d616bb1ee31f162b73e85fea91d7ca6441cf901398f572,1051
+    pantry-tree:
+      size: 210
+      sha256: e4daa79eb6a4442ec85c86dfeb0eb4bf8624f8dcc5291a2216165120ecb77c13
+  original:
+    hackage: fail-4.9.0.0
+- completed:
+    hackage: ordered-containers-0.2.2@sha256:ebf2be3f592d9cf148ea6b8375f8af97148d44f82d8d04476899285e965afdbf,810
+    pantry-tree:
+      size: 526
+      sha256: 757fd75227afa0107f8eb3ebb467856b1d7456276eb501d510c9b06cb5395fbc
+  original:
+    hackage: ordered-containers-0.2.2
+- completed:
+    hackage: semigroups-0.19.1@sha256:ecae129621e0d2f77bef2f01e4458c2e0567ab6e1f39579c61d7cec8058ebb0e,6262
+    pantry-tree:
+      size: 534
+      sha256: 61160272cccf0dcffe7fe23b7644412b959a8ec232bed4d43be235176f0bd90b
+  original:
+    hackage: semigroups-0.19.1
+- completed:
+    hackage: th-abstraction-0.3.2.0@sha256:9b5b4e6e2bbff9b075ad7751ee98e2107090bd17b51d5442695b8990e4db6521,1851
+    pantry-tree:
+      size: 583
+      sha256: 21e260e558db166dc70f3002e7a0d22dd57d0b9e7842dd9de5e2f9f887e1275e
+  original:
+    hackage: th-abstraction-0.3.2.0
+- completed:
+    hackage: th-lift-0.8.1@sha256:51ffb3c76b2175405f643d5461a07820fade6c5ac635698a87afe3aba35ae343,2544
+    pantry-tree:
+      size: 462
+      sha256: 79821d0901c430670dd1521ae5f0d6354707217cf9f173404862de534e8e9090
+  original:
+    hackage: th-lift-0.8.1
+- completed:
+    hackage: th-lift-instances-0.1.16@sha256:82562e05dd6f08943972549af31a7748b9ab128f65143abb9f0890b142d63df3,2608
+    pantry-tree:
+      size: 526
+      sha256: bda6b1bec896bc0ec616cc53285dba55cf31d15241168e6738605eee7227fe25
+  original:
+    hackage: th-lift-instances-0.1.16
+- completed:
+    hackage: th-reify-many-0.1.9@sha256:6ac71be9f3220cc7efeade308d5305dbe3fdfffae5a94d8a8ee70d180d0a2254,1752
+    pantry-tree:
+      size: 373
+      sha256: 29ff7becd49ea2838750810ce5d6be6c8e781c429be9c4ffea5844b03d97f216
+  original:
+    hackage: th-reify-many-0.1.9
+- completed:
+    hackage: th-orphans-0.13.10@sha256:69b7168d2e2ccad41ab299e1de846f44c4d7dde0fb691242923f3bc1fdf24276,2679
+    pantry-tree:
+      size: 527
+      sha256: d7303c7c90357b4cd4997033d79219355245ce0d80bbcbbd411f4d93bd2eb941
+  original:
+    hackage: th-orphans-0.13.10
+- completed:
+    hackage: th-expand-syns-0.4.6.0@sha256:73309fcbacca99a8c478c3cb86643e27c733e1ca3c7d3121e93960c02b0ff313,1223
+    pantry-tree:
+      size: 548
+      sha256: f32c6e2c9915ee1879cff48bb3ff148d5dd283a5144cb9de323c8613c6cdd436
+  original:
+    hackage: th-expand-syns-0.4.6.0
+- completed:
+    hackage: vector-0.12.1.2@sha256:9291bc581f36e51d5bda9fce57cb980fbec3dd292996896f285fef39eb80a9a0,7364
+    pantry-tree:
+      size: 3784
+      sha256: f79eefc8ba2b57ded2276f48046e64663d37b210b6047b6b6ecb30c9da196216
+  original:
+    hackage: vector-0.12.1.2
+- completed:
+    hackage: safe-0.3.19@sha256:0910dafb8898f52bde4c646e560228a0fd08b1fca5457f222d2f5c0fad6d2039,2317
+    pantry-tree:
+      size: 564
+      sha256: 40010636c24cebf3f3e29e9b3b8e6c35f249f5e5d253925433140bb0b4e3f891
+  original:
+    hackage: safe-0.3.19
+- completed:
+    hackage: primitive-0.7.0.1@sha256:a381571c36edc7dca28b77fe8159b43c14c640087ec5946adacf949feec64231,3433
+    pantry-tree:
+      size: 3221
+      sha256: fea4312bd404ad504e44a7fd933a3b3442c0a5e1c41bd8abec3c2e7282d88e18
+  original:
+    hackage: primitive-0.7.0.1
+- completed:
+    hackage: transformers-compat-0.6.5@sha256:50b00c57bf3fc379ec2477bfc261a2aebc983084488478adb29854f193af4696,5490
+    pantry-tree:
+      size: 1773
+      sha256: 3a15141e82214faba9ddcabaa63526273d4c8b7b1d9d6cbc643334bfe41fb2f8
+  original:
+    hackage: transformers-compat-0.6.5
+snapshots: []

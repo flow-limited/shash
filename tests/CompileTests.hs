@@ -14,6 +14,9 @@ unit = EUnit
 var :: FLAC '[] '["x" ':-> 'TVar "a"] 'Bot ('TVar "a")
 var = Var (Proxy @"x")
 
+del :: FLAC '[] '[] 'Bot ('ActsFor ('Raw "p") ('Raw "q"))
+del = Del Proxy Proxy
+
 lam :: FLAC '[] '[] 'Top ('Fn ('TVar "a") 'Top 'Unit)
 lam = Lambda (Proxy @"x") Proxy Proxy (EUnit @'[] @'["x" ':-> 'TVar "a"])
 
