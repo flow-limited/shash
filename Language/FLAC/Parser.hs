@@ -2,7 +2,7 @@
 
 module Language.FLAC.Parser where
 
-import Language.FLAC.Syntax
+import Language.FLAC.Syntax.Runtime
 import Control.Applicative
 import Data.Text (pack)
 
@@ -57,39 +57,39 @@ spanP f =
 -- ToDo: deal with whitespace
 -- Use many in GHCI: :m +Control.Applicative 
 
-principalValue :: Parser RPrin
+principalValue :: Parser Prin
 principalValue = principalTop <|> principalBottom <|> principalName <|> principalPVar <|> principalInteg 
   <|> principalConf <|> principalVoice <|> principalEye <|> principalConj <|> principalDisj
 
-principalTop :: Parser RPrin
-principalTop = (\_ -> RTop) <$> stringP "Top"
+principalTop :: Parser Prin
+principalTop = (\_ -> Top) <$> stringP "Top"
 
-principalBottom :: Parser RPrin
-principalBottom = (\_ -> RBot) <$> stringP "Bottom"
+principalBottom :: Parser Prin
+principalBottom = (\_ -> Bot) <$> stringP "Bottom"
 
-principalName :: Parser RPrin 
-principalName = RRaw <$> fmap pack (stringP "Name \"" *> spanP (/= '"') <* charP '"')
+principalName :: Parser Prin 
+principalName = Raw <$> fmap pack (stringP "Name \"" *> spanP (/= '"') <* charP '"')
 
-principalPVar :: Parser RPrin 
-principalPVar = RPVar <$> fmap pack (stringP "PVar \"" *> spanP (/= '"') <* charP '"')
+principalPVar :: Parser Prin 
+principalPVar = PVar <$> fmap pack (stringP "PVar \"" *> spanP (/= '"') <* charP '"')
 
-principalInteg :: Parser RPrin
-principalInteg = RInteg <$> (stringP "Integ " *> principalValue)
+principalInteg :: Parser Prin
+principalInteg = Integ <$> (stringP "Integ " *> principalValue)
 
-principalConf :: Parser RPrin
-principalConf = RConf <$> (stringP "Conf " *> principalValue) 
+principalConf :: Parser Prin
+principalConf = Conf <$> (stringP "Conf " *> principalValue) 
 
-principalVoice :: Parser RPrin
-principalVoice = RVoice <$> (stringP "Voice " *> principalValue) 
+principalVoice :: Parser Prin
+principalVoice = Voice <$> (stringP "Voice " *> principalValue) 
 
-principalEye :: Parser RPrin
-principalEye = REye <$> (stringP "Eye " *> principalValue) 
+principalEye :: Parser Prin
+principalEye = Eye <$> (stringP "Eye " *> principalValue) 
 
-principalConj :: Parser RPrin
-principalConj = (\_ p1 _ p2 -> RConj p1 p2) <$> stringP "Conj " <*> principalValue <*> charP ' ' <*> principalValue
+principalConj :: Parser Prin
+principalConj = (\_ p1 _ p2 -> Conj p1 p2) <$> stringP "Conj " <*> principalValue <*> charP ' ' <*> principalValue
 
-principalDisj :: Parser RPrin
-principalDisj = (\_ p1 _ p2 -> RDisj p1 p2) <$> stringP "Disj " <*> principalValue <*> charP ' ' <*> principalValue
+principalDisj :: Parser Prin
+principalDisj = (\_ p1 _ p2 -> Disj p1 p2) <$> stringP "Disj " <*> principalValue <*> charP ' ' <*> principalValue
 
 
 -- Parses Types

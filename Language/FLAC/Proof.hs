@@ -2,14 +2,17 @@
 
 module Language.FLAC.Proof where
 
-import Language.FLAC.Syntax
+import Language.FLAC.Syntax.Promoted
 import Language.FLAC.Proof.ActsFor
 
-import Data.Type.Map hiding (Var)
-import Data.Proxy
+import Data.Singletons
+import Data.Singletons.Prelude.List
 import GHC.TypeLits
 
-type Typed = Mapping Symbol Type
+type family Remove (x :: k) (l :: [(k,a)]) where
+  Remove k '[] = '[]
+  Remove k ('(k,a) ': ls) = ls
+  Remove k ('(x,a) ': ls) = '(x,a) ': Remove k ls
 
 type family Subst (t :: Type) (x :: Symbol) (t' :: Type) :: Type where
   Subst ('TVar x) x t = t
@@ -28,15 +31,15 @@ data FLAC
   (typctx :: [Typed])
   (pc :: Prin) (typ :: Type) where
   EUnit :: FLAC dx tx pc 'Unit
-  Var :: Lookup tx x ~ 'Just t => Proxy (x :: Symbol) -> FLAC dx tx pc t
-  Del :: Proxy p -> Proxy q -> FLAC dx tx pc ('ActsFor p q)
-  Lambda :: Lookup tx x ~ 'Just t =>
-    Proxy (x :: Symbol) -> Proxy (t :: Type) -> Proxy (pc' :: Prin)
+  Var :: Lookup x tx ~ 'Just t => Sing (x :: Symbol) -> FLAC dx tx pc t
+  Del :: Sing p -> Sing q -> FLAC dx tx pc ('ActsFor p q)
+  Lambda :: Lookup x tx ~ 'Just t =>
+    Sing (x :: Symbol) -> Sing (t :: Type) -> Sing (pc' :: Prin)
     -> FLAC dx tx pc' t2
-    -> FLAC dx (tx :\ x) pc ('Fn t pc' t2)
+    -> FLAC dx (Remove x tx) pc ('Fn t pc' t2)
   -- is this what TLam implies? X free in gamma?
-  TLambda :: Member x tx ~ 'False =>
-    Proxy (x :: Symbol) -> Proxy (pc' :: Prin)
+  TLambda :: Lookup x tx ~ 'Nothing =>
+    Sing (x :: Symbol) -> Sing (pc' :: Prin)
     -> FLAC dx tx pc' t
     -> FLAC dx tx pc ('Forall x pc' t)
   App :: FLAC dx tx pc ('Fn t1 pc' t2)
@@ -44,28 +47,34 @@ data FLAC
     -> FlowsTo dx pc pc'
     -> FLAC dx tx pc t2
   -- require t' well-formed in dx
-  TApp :: FLAC dx tx pc ('Forall x pc' t) -> FlowsTo dx pc pc' -> Proxy (t' :: Type)
+  TApp :: FLAC dx tx pc ('Forall x pc' t) -> FlowsTo dx pc pc' -> Sing (t' :: Type)
     -> FLAC dx tx pc (Subst t x t')
   Pair :: FLAC dx tx pc t1 -> FLAC dx tx pc t2 -> FLAC dx tx pc ('Times t1 t2)
   Project1 :: FLAC dx tx pc ('Times t1 t2) -> FLAC dx tx pc t1
   Project2 :: FLAC dx tx pc ('Times t1 t2) -> FLAC dx tx pc t2
   Inject1 :: FLAC dx tx pc t1 -> FLAC dx tx pc ('Plus t1 t2)
   Inject2 :: FLAC dx tx pc t2 -> FLAC dx tx pc ('Plus t1 t2)
-  Case :: (tx1 ~ ((x ':-> t1) ': tx), tx2 ~ ((y ':-> t2) ': tx)) =>
+  Case :: (tx1 ~ ('(x, t1) ': tx), tx2 ~ ('(y, t2) ': tx)) =>
     FLAC dx tx pc ('Plus t1 t2) -> FlowsToType dx pc t
-    -> Proxy (x :: Symbol) -> FLAC dx tx1 pc t
-    -> Proxy (y :: Symbol) -> FLAC dx tx2 pc t
+    -> Sing (x :: Symbol) -> FLAC dx tx1 pc t
+    -> Sing (y :: Symbol) -> FLAC dx tx2 pc t
     -> FLAC dx tx pc t
-  UnitM :: Proxy (l :: Prin) -> FLAC dx tx pc t -> FlowsTo dx pc l
+  UnitM :: Sing (l :: Prin) -> FLAC dx tx pc t -> FlowsTo dx pc l
     -> FLAC dx tx pc ('Says l t)
   -- do we end up needing this?
   -- SEALED :: FLAC dx tx pc ('Var v) t -> FLAC dx tx pc ('Protect l ('Var v)) ('Says l t)
-  Bind :: tx' ~ ((x ':-> t') ': tx) =>
-    Proxy (x :: Symbol) -> FLAC dx tx pc ('Says l t') -> FLAC dx tx' (Lub pc l) t
+  Bind :: tx' ~ ('(x, t') ': tx) =>
+    Sing (x :: Symbol) -> FLAC dx tx pc ('Says l t') -> FLAC dx tx' (Lub pc l) t
     -> FlowsToType dx (Lub pc l) t -> FLAC dx tx pc t
-  Assume :: dx' ~ ('Delegation p q ': dx) => -- is this what goes into dx?
+  Assume :: dx' ~ ('(p, q) ': dx) => -- is this what goes into dx?
     FLAC dx tx pc ('ActsFor p q)
     -> ActsFor dx pc ('Voice q)
     -> ActsFor dx ('Voice ('Conf p)) ('Voice ('Conf q))
     -> FLAC dx' tx pc t
     -> FLAC dx tx pc t
+
+data SFLAC where
+  SFLAC :: Sing (dx :: [Delegation])
+        -> Sing (tx :: [Typed])
+        -> Sing (p :: Prin)
+        -> Sing (t :: Type) -> FLAC dx tx p t -> SFLAC

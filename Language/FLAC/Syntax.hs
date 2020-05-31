@@ -1,86 +1,39 @@
-{-# LANGUAGE UnicodeSyntax, DefaultSignatures, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GADTs, InstanceSigs, KindSignatures, RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeFamilies, TypeInType, TypeOperators, UndecidableInstances, TypeApplications, StandaloneKindSignatures, OverloadedStrings #-}
+{-# LANGUAGE UnicodeSyntax, DefaultSignatures, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GADTs, InstanceSigs, KindSignatures, RankNTypes, ScopedTypeVariables, TemplateHaskell, TypeFamilies, TypeInType, TypeOperators, UndecidableInstances, TypeApplications, StandaloneKindSignatures, OverloadedStrings, StandaloneDeriving #-}
+
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Language.FLAC.Syntax where
 
-import GHC.TypeLits
 import Data.Singletons.TH
 import Data.Singletons.TH.Options
-import Data.Text (Text)
-import Language.Haskell.TH (Name)
 
-data RPrin = RRaw Text | RPVar Text | RTop | RBot
-          | RInteg RPrin | RConf RPrin
-          | RConj RPrin RPrin | RDisj RPrin RPrin
-          | RVoice RPrin | REye RPrin
+import Language.FLAC.Syntax.Runtime as R
+import Language.FLAC.Syntax.Promoted as P
 
-data Prin = Raw Symbol | PVar Symbol | Top | Bot
-          | Integ Prin | Conf Prin
-          | Conj Prin Prin | Disj Prin Prin
-          | Voice Prin | Eye Prin
+import Language.FLAC.Syntax.TH (promotionOptions)
 
-data RType = RActsFor RPrin RPrin | RUnit | RPlus RType RType | RTimes RType RType
-          | RFn RType RPrin RType | RSays RPrin RType
-          | RTVar Text | RForall Text RPrin RType
+$(withOptions promotionOptions $ (++)
+  <$> genSingletons [''R.Prin, ''R.Type]
+  <*> singDecideInstances [''P.Prin, ''P.Type])
+deriving instance Show P.Prin
+deriving instance Show P.Type
+deriving instance Show (SPrin a)
+deriving instance Show (SType a)
 
-data Type = ActsFor Prin Prin | Unit | Plus Type Type | Times Type Type
-          | Fn Type Prin Type | Says Prin Type
-          | TVar Symbol | Forall Symbol Prin Type
+(^→), (^←) :: P.Prin -> P.Prin
+(^→) = P.Conf
+(^←) = P.Integ
 
-data Exp = EUnit | Var String | EActsFor Prin Prin | App Exp Exp | Pair Exp Exp
-         | Protect Prin Exp | TApp Exp Type | Project1 Exp | Project2 Exp | Inject1 Exp | Inject2 Exp
-         | Case Exp String Exp String Exp | Bind String Exp Exp | Assume Exp Exp
-         | Lam String Type Prin Exp
-         | LAM String Prin Exp
+(∧), (∨) :: P.Prin -> P.Prin -> P.Prin
+(∧) = P.Conj
+(∨) = P.Disj
 
+(≽) :: P.Prin -> P.Prin -> P.Type
+(≽) = P.ActsFor
 
-$(let customPromote :: Name -> Name
-      customPromote n
-        | n == ''RPrin       = ''Prin
-        | n == 'RRaw         = 'Raw
-        | n == 'RPVar        = 'PVar
-        | n == 'RTop         = 'Top
-        | n == 'RBot         = 'Bot
-        | n == 'RInteg       = 'Integ
-        | n == 'RConf        = 'Conf
-        | n == 'RConj        = 'Conj
-        | n == 'RDisj        = 'Disj
-        | n == 'RVoice       = 'Voice
-        | n == 'REye         = 'Eye
-        | n == ''RType       = ''Type
-        | n == 'RActsFor     = 'ActsFor
-        | n == 'RUnit        = 'Unit
-        | n == 'RPlus        = 'Plus
-        | n == 'RTimes       = 'Times
-        | n == 'RFn          = 'Fn
-        | n == 'RSays        = 'Says
-        | n == 'RTVar        = 'TVar
-        | n == 'RForall      = 'Forall
-        | n == ''Text        = ''Symbol
-        | otherwise      = promotedDataTypeOrConName defaultOptions n
+(+), (×) :: P.Type -> P.Type -> P.Type
+(+) = P.Plus
+(×) = P.Times
 
-      customDefun :: Name -> Int -> Name
-      customDefun n sat = defunctionalizedName defaultOptions (customPromote n) sat in
-
-  withOptions defaultOptions{ promotedDataTypeOrConName = customPromote
-                            , defunctionalizedName      = customDefun
-                            } $ genSingletons [''RPrin, ''RType]
-    )
-
-
-(^→), (^←) :: Prin -> Prin
-(^→) = Conf
-(^←) = Integ
-
-(∧), (∨) :: Prin -> Prin -> Prin
-(∧) = Conj
-(∨) = Disj
-
-(≽) :: Prin -> Prin -> Type
-(≽) = ActsFor
-
-(+), (×) :: Type -> Type -> Type
-(+) = Plus
-(×) = Times
-
-says :: Prin -> Type -> Type
-says = Says
+says :: P.Prin -> P.Type -> P.Type
+says = P.Says

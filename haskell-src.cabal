@@ -36,9 +36,13 @@ library
         Language.Haskell.Syntax,
         Language.Haskell.ParseUtils
         Language.FLAC.Syntax
+        Language.FLAC.Syntax.Runtime
+        Language.FLAC.Syntax.Promoted
+        Language.FLAC.Syntax.TH
         Language.FLAC.Proof
         Language.FLAC.Parser
         Language.FLAC.Proof.ActsFor
+        Language.FLAC.Proof.TypeCheck
 
   build-depends: base    >= 4.3 && < 4.15
                , syb     >= 0.1 && < 0.8

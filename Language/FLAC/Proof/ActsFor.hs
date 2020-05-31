@@ -1,9 +1,12 @@
-{-# LANGUAGE GADTs, EmptyDataDecls, DataKinds, FlexibleContexts, KindSignatures, RankNTypes, TypeInType #-}
+{-# LANGUAGE GADTs, EmptyDataDecls, DataKinds, FlexibleContexts, KindSignatures, RankNTypes, TypeInType, TypeOperators, TypeFamilies #-}
 
 module Language.FLAC.Proof.ActsFor where
-import Language.FLAC.Syntax
 
-data Delegation = Delegation Prin Prin
+import GHC.TypeLits
+import Language.FLAC.Syntax.Promoted
+
+type Typed = (Symbol, Type)
+type Delegation = (Prin, Prin)
 
 data ActsFor (ctx :: [Delegation]) (a :: Prin) (b :: Prin) where
   ForBot :: forall ctx a. ActsFor ctx a 'Bot
