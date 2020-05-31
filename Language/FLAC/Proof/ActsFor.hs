@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, EmptyDataDecls, DataKinds, FlexibleContexts, KindSignatures, RankNTypes, TypeInType, TypeOperators, TypeFamilies #-}
+{-# LANGUAGE GADTs, EmptyDataDecls, DataKinds, FlexibleContexts, KindSignatures, RankNTypes, TypeInType, TypeOperators, TypeFamilies, StandaloneDeriving #-}
 
 module Language.FLAC.Proof.ActsFor where
 
@@ -26,6 +26,8 @@ data ActsFor (ctx :: [Delegation]) (a :: Prin) (b :: Prin) where
   Trans :: ActsFor ctx a b -> ActsFor ctx b c -> ActsFor ctx a c
 --  Assume :: HMember (Delegation p q) ctx 'True => ActsFor ctx ('Voice ('Conf p)) ('Voice ('Conf q)) -> ActsFor ctx p q
 
+deriving instance Show (ActsFor dx a b)
+
 type FlowsTo (ctx :: [Delegation]) (a :: Prin) (b :: Prin) = (ActsFor ctx ('Conf b) ('Conf a), ActsFor ctx ('Integ a) ('Integ b))
 
 data FlowsToType (ctx :: [Delegation]) (a :: Prin) (t :: Type) where
@@ -35,3 +37,5 @@ data FlowsToType (ctx :: [Delegation]) (a :: Prin) (t :: Type) where
   PFUN :: FlowsToType dx l t2 -> FlowsTo dx l pc' -> FlowsToType dx l ('Fn t1 pc' t2)
   PTFUN :: FlowsToType dx l t -> FlowsTo dx l pc' -> FlowsToType dx l ('Forall x pc' t)
   PLBL :: FlowsTo dx l l' -> FlowsToType dx l ('Says l t)
+
+deriving instance Show (FlowsToType dx a t)

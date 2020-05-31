@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, DataKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell #-}
+{-# LANGUAGE GADTs, DataKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell, StandaloneDeriving #-}
 
 module Language.FLAC.Proof where
 
@@ -80,8 +80,12 @@ data FLAC
     -> FLAC dx' tx pc t
     -> FLAC dx tx pc t
 
+deriving instance Show (FLAC dx tx pc t)
+
 data SFLAC where
   SFLAC :: Sing (dx :: [Delegation])
         -> Sing (tx :: [Typed])
         -> Sing (p :: Prin)
         -> Sing (t :: Type) -> FLAC dx tx p t -> SFLAC
+
+deriving instance Show SFLAC
