@@ -92,7 +92,6 @@ packages:
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
 extra-deps:
-  - type-level-sets-0.8.9.0
   - git: https://github.com/goldfirere/singletons
     commit: 5f8f2b418989ba0109e965f634f0cf7a850f9191
   - happy-1.19.12

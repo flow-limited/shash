@@ -9,6 +9,7 @@ type Typed = (Symbol, Type)
 type Delegation = (Prin, Prin)
 
 data ActsFor (ctx :: [Delegation]) (a :: Prin) (b :: Prin) where
+  FAKE :: ActsFor ctx a b
   ForBot :: forall ctx a. ActsFor ctx a 'Bot
   TopFor :: forall ctx a. ActsFor ctx 'Top a
   Refl :: forall ctx a. ActsFor ctx a a
@@ -28,6 +29,7 @@ data ActsFor (ctx :: [Delegation]) (a :: Prin) (b :: Prin) where
 type FlowsTo (ctx :: [Delegation]) (a :: Prin) (b :: Prin) = (ActsFor ctx ('Conf b) ('Conf a), ActsFor ctx ('Integ a) ('Integ b))
 
 data FlowsToType (ctx :: [Delegation]) (a :: Prin) (t :: Type) where
+  FAKET :: FlowsToType dx l t
   PUNIT :: FlowsToType dx l 'Unit
   PPAIR :: FlowsToType dx l a -> FlowsToType dx l b -> FlowsToType dx l ('Times a b)
   PFUN :: FlowsToType dx l t2 -> FlowsTo dx l pc' -> FlowsToType dx l ('Fn t1 pc' t2)

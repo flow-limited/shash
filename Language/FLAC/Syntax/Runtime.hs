@@ -14,7 +14,8 @@ data Type = ActsFor Prin Prin | Unit | Plus Type Type | Times Type Type
           deriving (Show, Eq)
 
 data Exp = EUnit | Var Text | EActsFor Prin Prin | App Exp Exp | Pair Exp Exp
-         | Protect Prin Exp | TApp Exp Type | Project1 Exp | Project2 Exp | Inject1 Exp | Inject2 Exp
+         | Protect Prin Exp | TApp Exp Type | Project1 Exp | Project2 Exp
+         | Inject1 Exp (Maybe Type) | Inject2 Exp (Maybe Type)
          | Case Exp Text Exp Text Exp | Bind Text Exp Exp | Assume Exp Exp
          | Lam Text Type Prin Exp
          | LAM Text Prin Exp

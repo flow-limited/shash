@@ -1,30 +1,37 @@
-{-# LANGUAGE GADTs, DataKinds, FlexibleContexts, RankNTypes, TypeInType, TypeOperators, TypeFamilies #-}
+{-# LANGUAGE GADTs, DataKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell #-}
 
 module Language.FLAC.Proof where
 
+import Language.FLAC.Syntax
+import Language.FLAC.Syntax.TH
 import Language.FLAC.Syntax.Promoted
 import Language.FLAC.Proof.ActsFor
 
+import Control.Monad.Trans.Class (lift)
 import Data.Singletons
+import Data.Singletons.TH
+import Data.Singletons.TH.Options
 import Data.Singletons.Prelude.List
 import GHC.TypeLits
 
-type family Remove (x :: k) (l :: [(k,a)]) where
-  Remove k '[] = '[]
-  Remove k ('(k,a) ': ls) = ls
-  Remove k ('(x,a) ': ls) = '(x,a) ': Remove k ls
+$(withOptions promotionOptions $ singletons $ lift [d|
+  remove :: Eq a => a -> [(a,b)] -> [(a,b)]
+  remove _ [] = []
+  remove a ((b,d):bs) = if (a == b) then remove a bs else (b,d):(remove a bs)
 
-type family Subst (t :: Type) (x :: Symbol) (t' :: Type) :: Type where
-  Subst ('TVar x) x t = t
-  Subst ('Forall x p t) x _ = 'Forall x p t
-  Subst ('Forall x p t) y t' = 'Forall x p (Subst t y t')
-  Subst ('Plus t1 t2) x t' = 'Plus (Subst t1 x t') (Subst t2 x t')
-  Subst ('Times t1 t2) x t' = 'Times (Subst t1 x t') (Subst t2 x t')
-  Subst ('Fn t1 p t2) x t' = 'Fn (Subst t1 x t') p (Subst t2 x t')
-  Subst ('Says p t) x t' = 'Says p (Subst t x t')
-  Subst t _ _ = t
+  subst :: Type -> Symbol -> Type -> Type
+  subst v@(TVar x) y t = if (x == y) then t else v
+  subst (Forall x p t) y t' = if (x == y) then Forall x p t else Forall x p (subst t y t')
+  subst (Plus t1 t2) x t = Plus (subst t1 x t) (subst t2 x t)
+  subst (Times t1 t2) x t = Times (subst t1 x t) (subst t2 x t)
+  subst (Fn t1 p t2) x t' = Fn (subst t1 x t') p (subst t2 x t')
+  subst (Says p t) x t' = Says p (subst t x t')
+  subst (ActsFor p q) _ _ = ActsFor p q
+  subst Unit _ _ = Unit
 
-type family Lub (p :: Prin) (q :: Prin) :: Prin
+  lub :: Prin -> Prin -> Prin
+  lub p q = Conj (Conf (Conj p q)) (Integ (Disj p q))
+                                                     |])
 
 data FLAC
   (delctx :: [Delegation])

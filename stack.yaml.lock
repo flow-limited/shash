@@ -5,16 +5,6 @@
 
 packages:
 - completed:
-    hackage: type-level-sets-0.8.9.0@sha256:e29f4045b68e46e0f88153c63f48fb026917eeacafd9b81fc059417a85e68031,3123
-    pantry-tree:
-      size: 382
-      sha256: e7b4e38017e1231b70c511f95a057692a43366408137639da510b25155662a09
-  original:
-    hackage: type-level-sets-0.8.9.0
-- completed:
-    cabal-file:
-      size: 7428
-      sha256: b582f3b0401bdae3ff30b3eaede251a307c69904bda490877b4d2f6ec9290843
     name: singletons
     version: '2.8'
     git: https://github.com/goldfirere/singletons
@@ -40,9 +30,6 @@ packages:
   original:
     hackage: syb-0.7.1
 - completed:
-    cabal-file:
-      size: 3577
-      sha256: 625e57abf6edd66a75f05d162f5c00c2bafdec41498c5d2c48fcaf76fc437df6
     name: th-desugar
     version: '1.12'
     git: https://github.com/goldfirere/th-desugar
