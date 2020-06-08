@@ -1,18 +1,22 @@
-{-# LANGUAGE GADTs, DataKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell, StandaloneDeriving #-}
+{-# LANGUAGE GADTs, DataKinds, ConstraintKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell, StandaloneDeriving #-}
 
 module Language.FLAC.Proof where
 
 import Language.FLAC.Syntax
 import Language.FLAC.Syntax.TH
 import Language.FLAC.Syntax.Promoted
-import Language.FLAC.Proof.ActsFor
 
 import Control.Monad.Trans.Class (lift)
 import Data.Singletons
 import Data.Singletons.TH
 import Data.Singletons.TH.Options
 import Data.Singletons.Prelude.List
+import Data.Singletons.Prelude.Tuple
+import Data.Singletons.Prelude.Bool
 import GHC.TypeLits
+
+type Typed = (Symbol, Type)
+type Delegation = (Prin, Prin)
 
 $(withOptions promotionOptions $ singletons $ lift [d|
   remove :: Eq a => a -> [(a,b)] -> [(a,b)]
@@ -31,7 +35,28 @@ $(withOptions promotionOptions $ singletons $ lift [d|
 
   lub :: Prin -> Prin -> Prin
   lub p q = Conj (Conf (Conj p q)) (Integ (Disj p q))
+
+  delegates :: [(Prin, Prin)] -> Prin -> Prin -> Bool
+  delegates dx a b =
+             if (a == b)
+             then True
+             else any (\c -> delegates dx c b) (map snd (filter (\(m,_) -> m == a) dx))
+
+  delegatesType :: [(Prin, Prin)] -> Prin -> Type -> Bool
+  delegatesType _  _ Unit = True
+  delegatesType dx l (Times s t) = delegatesType dx l s && delegatesType dx l t
+  delegatesType dx l (Fn _ pc t) = delegatesType dx l t && delegates dx l pc
+  delegatesType dx l (Forall _ pc t) = delegatesType dx l t && delegates dx l pc
+  delegatesType dx l (Says l' _) = delegates dx l l'
+  delegatesType _ _ (ActsFor _ _) = False
+  delegatesType _ _ (Plus _ _) = False
+  delegatesType _ _ (TVar _) = False -- TODO: check these three cases
                                                      |])
+
+type ActsFor (dx :: [Delegation]) (a :: Prin) (b :: Prin) = Delegates dx a b ~ 'True
+type FlowsTo (dx :: [Delegation]) (a :: Prin) (b :: Prin) = (Delegates dx ('Conf b) ('Conf a) ~ 'True, Delegates dx ('Integ a) ('Integ b) ~ 'True)
+type FlowsToType (dx :: [Delegation]) (a :: Prin) (t :: Type) =
+  DelegatesType dx a t ~ 'True
 
 data FLAC
   (delctx :: [Delegation])
@@ -49,34 +74,33 @@ data FLAC
     Sing (x :: Symbol) -> Sing (pc' :: Prin)
     -> FLAC dx tx pc' t
     -> FLAC dx tx pc ('Forall x pc' t)
-  App :: FLAC dx tx pc ('Fn t1 pc' t2)
+  App :: FlowsTo dx pc pc' =>
+    FLAC dx tx pc ('Fn t1 pc' t2)
     -> FLAC dx tx pc t1
-    -> FlowsTo dx pc pc'
     -> FLAC dx tx pc t2
   -- require t' well-formed in dx
-  TApp :: FLAC dx tx pc ('Forall x pc' t) -> FlowsTo dx pc pc' -> Sing (t' :: Type)
-    -> FLAC dx tx pc (Subst t x t')
+  TApp :: FlowsTo dx pc pc' =>
+    FLAC dx tx pc ('Forall x pc' t) -> Sing (t' :: Type) -> FLAC dx tx pc (Subst t x t')
   Pair :: FLAC dx tx pc t1 -> FLAC dx tx pc t2 -> FLAC dx tx pc ('Times t1 t2)
   Project1 :: FLAC dx tx pc ('Times t1 t2) -> FLAC dx tx pc t1
   Project2 :: FLAC dx tx pc ('Times t1 t2) -> FLAC dx tx pc t2
   Inject1 :: FLAC dx tx pc t1 -> FLAC dx tx pc ('Plus t1 t2)
   Inject2 :: FLAC dx tx pc t2 -> FLAC dx tx pc ('Plus t1 t2)
-  Case :: (tx1 ~ ('(x, t1) ': tx), tx2 ~ ('(y, t2) ': tx)) =>
-    FLAC dx tx pc ('Plus t1 t2) -> FlowsToType dx pc t
+  Case :: (tx1 ~ ('(x, t1) ': tx), tx2 ~ ('(y, t2) ': tx), FlowsToType dx pc t) =>
+    FLAC dx tx pc ('Plus t1 t2)
     -> Sing (x :: Symbol) -> FLAC dx tx1 pc t
     -> Sing (y :: Symbol) -> FLAC dx tx2 pc t
     -> FLAC dx tx pc t
-  UnitM :: Sing (l :: Prin) -> FLAC dx tx pc t -> FlowsTo dx pc l
-    -> FLAC dx tx pc ('Says l t)
+  UnitM :: FlowsTo dx pc l =>
+    Sing (l :: Prin) -> FLAC dx tx pc t -> FLAC dx tx pc ('Says l t)
   -- do we end up needing this?
   -- SEALED :: FLAC dx tx pc ('Var v) t -> FLAC dx tx pc ('Protect l ('Var v)) ('Says l t)
-  Bind :: tx' ~ ('(x, t') ': tx) =>
+  Bind :: (tx' ~ ('(x, t') ': tx), FlowsToType dx (Lub pc l) t) =>
     Sing (x :: Symbol) -> FLAC dx tx pc ('Says l t') -> FLAC dx tx' (Lub pc l) t
-    -> FlowsToType dx (Lub pc l) t -> FLAC dx tx pc t
-  Assume :: dx' ~ ('(p, q) ': dx) => -- is this what goes into dx?
+    -> FLAC dx tx pc t
+  Assume :: (dx' ~ ('(p, q) ': dx), -- is this what goes into dx?
+             ActsFor dx pc ('Voice q), ActsFor dx ('Voice ('Conf p)) ('Voice ('Conf q))) =>
     FLAC dx tx pc ('ActsFor p q)
-    -> ActsFor dx pc ('Voice q)
-    -> ActsFor dx ('Voice ('Conf p)) ('Voice ('Conf q))
     -> FLAC dx' tx pc t
     -> FLAC dx tx pc t
 

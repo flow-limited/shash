@@ -10,7 +10,6 @@ import qualified Language.FLAC.Syntax.Runtime as R
 import qualified Language.FLAC.Syntax.Promoted as P
 import Language.FLAC.Syntax
 import Language.FLAC.Proof
-import Language.FLAC.Proof.ActsFor (ActsFor(FAKE), FlowsToType(FAKET))
 
 type TyCtx = [(Text, R.Type)]
 type DelCtx = [(R.Prin, R.Prin)]
@@ -50,10 +49,12 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
       (Just (SFLAC sdx'  stx'  sp' (SFn st1 spc' st2) f1),
        Just (SFLAC sdx'' stx'' sp'' st1' f2)) ->
         case (sdx %~ sdx', sdx' %~ sdx'', stx %~ stx', stx' %~ stx'',
-              sp %~ sp', sp' %~ sp'', st1 %~ st1') of
+              sp %~ sp', sp' %~ sp'', st1 %~ st1',
+              sDelegates sdx (SConf spc') (SConf sp) %~ STrue,
+              sDelegates sdx (SInteg sp) (SInteg spc') %~ STrue) of
           (Proved Refl, Proved Refl, Proved Refl, Proved Refl,
-           Proved Refl, Proved Refl, Proved Refl) ->
-            Just $ SFLAC sdx stx sp st2 (App f1 f2 (FAKE, FAKE)) -- TODO: real flowsto proof
+           Proved Refl, Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+            Just $ SFLAC sdx stx sp st2 (App f1 f2)
           _ -> Nothing
       _ -> Nothing
     go (R.Pair e1 e2) sdx stx sp = case (prove e1 dx_ tx_ p_, prove e2 dx_ tx_ p_) of
@@ -68,16 +69,22 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
       _ -> Nothing
     go (R.Protect l e) sdx stx sp = case prove e dx_ tx_ p_ of
       Just (SFLAC sdx' stx' sp' st f) -> withSomeSing l $ \sl ->
-        case (sdx %~ sdx', stx %~ stx', sp %~ sp') of
-          (Proved Refl, Proved Refl, Proved Refl) ->
-            Just $ SFLAC sdx stx sp (SSays sl st) (UnitM sl f (FAKE, FAKE)) -- TODO: real flowsto proof
+        case (sdx %~ sdx', stx %~ stx', sp %~ sp',
+              sDelegates sdx (SConf sl) (SConf sp) %~ STrue,
+              sDelegates sdx (SInteg sp) (SInteg sl) %~ STrue
+             ) of
+          (Proved Refl, Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+            Just $ SFLAC sdx stx sp (SSays sl st) (UnitM sl f)
           _ -> Nothing
       _ -> Nothing
     go (R.TApp e1 t1) sdx stx sp = case prove e1 dx_ tx_ p_ of
       Just (SFLAC sdx' stx' sp' (SForall sx sp'' st) f) -> withSomeSing t1 $ \st1 ->
-        case (sdx %~ sdx', stx %~ stx', sp %~ sp') of
-          (Proved Refl, Proved Refl, Proved Refl) ->
-            Just $ SFLAC sdx stx sp (sSubst st sx st1) (TApp f (FAKE,FAKE) st1) -- TODO: real flowsto proof
+        case (sdx %~ sdx', stx %~ stx', sp %~ sp',
+              sDelegates sdx (SConf sp'') (SConf sp) %~ STrue,
+              sDelegates sdx (SInteg sp) (SInteg sp'') %~ STrue
+             ) of
+          (Proved Refl, Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+            Just $ SFLAC sdx stx sp (sSubst st sx st1) (TApp f st1)
           _ -> Nothing
       _ -> Nothing
     go (R.Project1 e) sdx stx sp = case prove e dx_ tx_ p_  of
@@ -122,10 +129,11 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
                 (Just (SFLAC sdx''  stx''  sp''  st  f1),
                  Just (SFLAC sdx''' stx''' sp''' st' f2)) ->
                   case (sdx %~ sdx'', sdx %~ sdx''', stx1 %~ stx'', stx2 %~ stx''',
-                       sp %~ sp'', sp %~ sp''', st %~ st') of
+                       sp %~ sp'', sp %~ sp''', st %~ st',
+                       sDelegatesType sdx sp st %~ STrue) of
                     (Proved Refl, Proved Refl, Proved Refl, Proved Refl,
-                     Proved Refl, Proved Refl, Proved Refl) ->
-                      Just $ SFLAC sdx stx sp st (Case f FAKET sx f1 sy f2) -- TODO: actual flowstotype proof
+                     Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+                      Just $ SFLAC sdx stx sp st (Case f sx f1 sy f2)
                     _ -> Nothing
                 _ -> Nothing
           _ -> Nothing
@@ -138,9 +146,10 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
                 slub = sLub sp sl in
               case prove e2 dx_ (fromSing stx1) (fromSing slub) of
                 Just (SFLAC sdx'' stx'' sp'' st'' f2) ->
-                  case (sdx %~ sdx'', stx1 %~ stx'', slub %~ sp'') of
-                    (Proved Refl, Proved Refl, Proved Refl) ->
-                      Just $ SFLAC sdx stx sp st'' (Bind sx f1 f2 FAKET) -- TODO: actual flowstotype proof
+                  case (sdx %~ sdx'', stx1 %~ stx'', slub %~ sp'',
+                       sDelegatesType sdx slub st'' %~ STrue) of
+                    (Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+                      Just $ SFLAC sdx stx sp st'' (Bind sx f1 f2)
                     _ -> Nothing
                 _ -> Nothing
           _ -> Nothing
@@ -153,9 +162,11 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
                 dx'' = fromSing sdx'' in
               case prove e2 dx'' tx_ p_ of
                 Just (SFLAC sdx''' stx''' sp''' st''' f2) ->
-                  case (sdx'' %~ sdx''', stx %~ stx''', sp %~ sp''') of
-                    (Proved Refl, Proved Refl, Proved Refl) ->
-                      Just $ SFLAC sdx stx sp st''' (Assume f1 FAKE FAKE f2) -- TODO: actual actsfor proof
+                  case (sdx'' %~ sdx''', stx %~ stx''', sp %~ sp''',
+                       sDelegates sdx sp (SVoice sb) %~ STrue,
+                       sDelegates sdx (SVoice (SConf sa)) (SVoice (SConf sb)) %~ STrue) of
+                    (Proved Refl, Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+                      Just $ SFLAC sdx stx sp st''' (Assume f1 f2)
                     _ -> Nothing
                 _ -> Nothing
           _ -> Nothing
