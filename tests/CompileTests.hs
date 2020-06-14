@@ -4,7 +4,6 @@ module Main where
 
 import Language.FLAC.Syntax.Promoted
 import Language.FLAC.Proof
-import Language.FLAC.Proof.ActsFor
 import Data.Singletons
 
 unit :: FLAC '[] '[] 'Bot 'Unit
@@ -26,7 +25,7 @@ inj :: FLAC '[] '[] 'Bot ('Plus ('Says 'Top 'Unit) 'Unit)
 inj = Inject2 EUnit
 
 case_ :: FLAC '[] '[] 'Bot 'Unit
-case_ = Case (Inject1 EUnit) PUNIT (sing @"x") EUnit (sing @"y") EUnit
+case_ = Case (Inject1 EUnit) (sing @"x") EUnit (sing @"y") EUnit
 
 main :: IO ()
 main = return ()
