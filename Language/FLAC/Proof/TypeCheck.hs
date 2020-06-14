@@ -172,13 +172,16 @@ prove e_ dx_ tx_ p_ = with3Sing dx_ tx_ p_ (go e_)
           _ -> Nothing
       _ -> Nothing
     go (R.Lam x t pc' e) sdx stx sp = with3Sing x t pc' $ \sx st spc' ->
-      case prove e dx_ tx_ pc' of
-        Just (SFLAC sdx' stx' spc'' st2 f) ->
-          case (sLookup sx stx %~ SJust st, sdx %~ sdx', stx %~ stx', spc' %~ spc'') of
-            (Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
-              Just $ SFLAC sdx (sRemove sx stx) sp (SFn st spc' st2) (Lambda sx st spc' f)
-            _ -> Nothing
-        _ -> Nothing
+      let stx'' = SCons (STuple2 sx st) stx
+          tx'' = fromSing stx'' in
+        case prove e dx_ tx'' pc' of
+          Just (SFLAC sdx' stx' spc'' st2 f) ->
+            case (sLookup sx stx'' %~ SJust st, stx %~ sRemove sx stx', stx' %~ stx'',
+                 sdx %~ sdx', spc' %~ spc'') of
+              (Proved Refl, Proved Refl, Proved Refl, Proved Refl, Proved Refl) ->
+                Just $ SFLAC sdx (sRemove sx stx) sp (SFn st spc' st2) (Lambda sx st spc' f)
+              _ -> Nothing
+          _ -> Nothing
     go (R.LAM x pc' e) sdx stx sp = with2Sing x pc' $ \sx spc' ->
       case prove e dx_ tx_ pc' of
         Just (SFLAC sdx' stx' spc'' st f) ->

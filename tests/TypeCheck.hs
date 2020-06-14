@@ -28,7 +28,7 @@ tests :: TestTree
 tests = testGroup "Tests" [toTypeTests]
 
 toTypeTests :: TestTree
-toTypeTests = testGroup "toType" [ eunits, vars, pairs, cases ]
+toTypeTests = testGroup "toType" [ eunits, vars, pairs, cases, lam]
 
 eunits :: TestTree
 eunits = testGroup "EUnit"
@@ -65,4 +65,11 @@ cases = testGroup "Case"
     testCase "fails if subcase doesn't prove" $ fails (Case (Inject1 (Var "a") (Just Unit))
                                                        "x" (Var "x")
                                                        "y" (Var "y")) [] [] Top
+  ]
+
+lam :: TestTree
+lam = testGroup "Lam"
+  [
+    testCase "using var" $ proves (Lam "x" Unit (Raw "alice") (Var "x")) [] [] Top,
+    testCase "unused var" $ proves (Lam "x" Unit (Raw "alice") EUnit) [] [] Top
   ]
