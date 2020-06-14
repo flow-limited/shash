@@ -36,11 +36,57 @@ $(withOptions promotionOptions $ singletons $ lift [d|
   lub :: Prin -> Prin -> Prin
   lub p q = Conj (Conf (Conj p q)) (Integ (Disj p q))
 
+  -- we can't singleton anything with overlapping guards
+  -- which is why this is so awkwardly written
   delegates :: [(Prin, Prin)] -> Prin -> Prin -> Bool
-  delegates dx a b =
-             if (a == b)
-             then True
-             else any (\c -> delegates dx c b) (map snd (filter (\(m,_) -> m == a) dx))
+  delegates dx a b = b == Bot || a == Top || a == b ||
+            unConf a (\a' -> unConf b (\b' -> delegates dx a' b')) ||
+            unInteg a (\a' -> unInteg b (\b' -> delegates dx a' b')) ||
+            unConj a (\p1 p2 -> delegates dx p1 b || delegates dx p2 b) ||
+            unConj b (\q1 q2 -> delegates dx a q1 && delegates dx a q2) ||
+            unDisj a (\p1 p2 -> delegates dx p1 b && delegates dx p2 b) ||
+            unDisj b (\q1 q2 -> delegates dx a q1 || delegates dx a q2) ||
+            any (\c -> delegates dx c b) (map snd (filter (\(m,_) -> m == a) dx))
+    where unConf (Raw _) _ = False
+          unConf (PVar _) _ = False
+          unConf Top _ = False
+          unConf Bot _ = False
+          unConf (Integ _) _ = False
+          unConf (Conf p) f = f p
+          unConf (Conj _ _) _ = False
+          unConf (Disj _ _) _ = False
+          unConf (Voice _) _ = False
+          unConf (Eye _) _ = False
+          unInteg (Raw _) _ = False
+          unInteg (PVar _) _ = False
+          unInteg Top _ = False
+          unInteg Bot _ = False
+          unInteg (Integ p) f = f p
+          unInteg (Conf _) _ = False
+          unInteg (Conj _ _) _ = False
+          unInteg (Disj _ _) _ = False
+          unInteg (Voice _) _ = False
+          unInteg (Eye _) _ = False
+          unConj (Raw _) _ = False
+          unConj (PVar _) _ = False
+          unConj Top _ = False
+          unConj Bot _ = False
+          unConj (Integ _) _ = False
+          unConj (Conf _) _ = False
+          unConj (Conj p q) f = f p q
+          unConj (Disj _ _) _ = False
+          unConj (Voice _) _ = False
+          unConj (Eye _) _ = False
+          unDisj (Raw _) _ = False
+          unDisj (PVar _) _ = False
+          unDisj Top _ = False
+          unDisj Bot _ = False
+          unDisj (Integ _) _ = False
+          unDisj (Conf _) _ = False
+          unDisj (Conj _ _) _ = False
+          unDisj (Disj p q) f = f p q
+          unDisj (Voice _) _ = False
+          unDisj (Eye _) _ = False
 
   delegatesType :: [(Prin, Prin)] -> Prin -> Type -> Bool
   delegatesType _  _ Unit = True

@@ -28,7 +28,7 @@ tests :: TestTree
 tests = testGroup "Tests" [toTypeTests]
 
 toTypeTests :: TestTree
-toTypeTests = testGroup "toType" [ eunits, vars, pairs, cases, lam]
+toTypeTests = testGroup "toType" [ eunits, vars, pairs, cases, lam, app]
 
 eunits :: TestTree
 eunits = testGroup "EUnit"
@@ -73,3 +73,14 @@ lam = testGroup "Lam"
     testCase "using var" $ proves (Lam "x" Unit (Raw "alice") (Var "x")) [] [] Top,
     testCase "unused var" $ proves (Lam "x" Unit (Raw "alice") EUnit) [] [] Top
   ]
+
+app :: TestTree
+app = testGroup "App"
+  [
+    testCase "matching pc 1" $ proves (App (l Top) EUnit) [] [] Top,
+    testCase "matching pc 2" $ proves (App (l alice) EUnit) [] [] alice,
+    testCase "unmatching pc 1" $ fails (App (l alice) EUnit) [] [] Top,
+    testCase "unmatching pc 2" $ proves (App (l alice) EUnit) [(alice, Top)] [] Top
+  ]
+  where l pc = Lam "x" Unit pc (Var "x")
+        alice = Raw "alice"
