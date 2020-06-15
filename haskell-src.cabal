@@ -41,6 +41,9 @@ library
         Language.FLAC.Syntax.TH
         Language.FLAC.Proof
         Language.FLAC.Parser
+        Language.FLAC.Proof.Solver.ActsFor
+        Language.FLAC.Proof.Solver.Delegations
+        Language.FLAC.Proof.Solver.Norm
         Language.FLAC.Proof.Solver.Inference
         Language.FLAC.Proof.TypeCheck
 
