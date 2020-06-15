@@ -1,10 +1,12 @@
-{-# LANGUAGE GADTs, DataKinds, ConstraintKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell, StandaloneDeriving #-}
+{-# LANGUAGE GADTs, DataKinds, ConstraintKinds, TypeOperators, TypeFamilies, TypeApplications, ScopedTypeVariables, PolyKinds, StandaloneKindSignatures, UndecidableInstances, TemplateHaskell, StandaloneDeriving, FlexibleContexts, AllowAmbiguousTypes #-}
 
 module Language.FLAC.Proof where
 
 import Language.FLAC.Syntax
 import Language.FLAC.Syntax.TH
 import Language.FLAC.Syntax.Promoted
+import qualified Language.FLAC.Syntax.Runtime as R
+import qualified Data.Text as T
 
 import Control.Monad.Trans.Class (lift)
 import Data.Singletons
@@ -159,3 +161,14 @@ data SFLAC where
         -> Sing (t :: Type) -> FLAC dx tx p t -> SFLAC
 
 deriving instance Show SFLAC
+
+rSubst :: R.Type -> T.Text -> R.Type -> R.Type
+rSubst t x t' = withSomeSing t $ \st ->
+                  withSomeSing x $ \sx ->
+                    withSomeSing t' $ \st' ->
+                      fromSing (sSubst st sx st')
+
+rLub :: R.Prin -> R.Prin -> R.Prin
+rLub p q = withSomeSing p $ \sp ->
+             withSomeSing q $ \sq ->
+                fromSing (sLub sp sq)
