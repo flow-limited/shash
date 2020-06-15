@@ -58,6 +58,7 @@ library
                , ghc >= 8.10 && < 8.11
                , containers >= 0.6 && < 0.7
                , mtl >= 2.2 && < 2.3
+               , binary >= 0.8 && < 0.9
   if !impl(ghc >= 8.0)
     build-depends: semigroups == 0.18.*, fail == 4.9.*
   else

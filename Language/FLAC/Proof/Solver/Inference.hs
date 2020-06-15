@@ -6,6 +6,7 @@ import Data.List (delete)
 
 import Language.FLAC.Syntax.Runtime
 import Language.FLAC.Proof (SFLAC, rSubst, rLub)
+import Language.FLAC.Proof.Solver.Delegations (inferDelegations)
 import qualified Language.FLAC.Proof.TypeCheck as TC
 
 import qualified Data.Map as M
@@ -141,12 +142,21 @@ instance Subst InferCtx where
 isFresh :: Text -> Bool
 isFresh t = take 3 t == "__f" -- yeah, this is hacky. TODO: do this better
 
-compile :: Exp -> Maybe SFLAC
-compile e = wanteds Top e >>= inferTypes >>= inferDelegates >>= prove
-  where prove (dx', tx', e') = TC.prove e' dx' (M.toList tx') Top
+compile :: Prin -> Exp -> Maybe SFLAC
+compile pc e = compileWithGivens pc [] e
 
-inferDelegates :: (Dx, Tx, Exp) -> Maybe (Dx, Tx, Exp)
-inferDelegates = Just -- TODO:
+compileWithGivens :: Prin -> [(Prin, Prin)] -> Exp -> Maybe SFLAC
+compileWithGivens pc givens e = do ws <- wanteds pc e
+                                   (dx', tx', e') <- inferTypes ws
+                                   dx'' <- inferDelegates dx' givens
+                                   TC.prove e' (dx'' ++ givens) (M.toList tx') pc
+
+-- TODO: this solver provides a mapping for name -> prin
+-- whereas the current proof encoding uses prin -> prin
+-- one of those probably should change. consider this a temporary kludge
+inferDelegates :: Dx -> [(Prin, Prin)] -> Maybe Dx
+inferDelegates dx' givens = fmap (map (\(x,p) -> (PVar x, p)) . M.toList) $
+  inferDelegations (const True) givens dx'
 
 inferTypes :: InferCtx -> Maybe (Dx, Tx, Exp)
 inferTypes (InferCtx dx' tx' [] exp' _) = Just (dx', tx', exp')

@@ -44,6 +44,7 @@ $(withOptions promotionOptions $ singletons $ lift [d|
   delegates dx a b = b == Bot || a == Top || a == b ||
             unConf a (\a' -> unConf b (\b' -> delegates dx a' b')) ||
             unInteg a (\a' -> unInteg b (\b' -> delegates dx a' b')) ||
+            unConf b (\b' -> a == b') || unInteg b (\b' -> a == b') ||
             unConj a (\p1 p2 -> delegates dx p1 b || delegates dx p2 b) ||
             unConj b (\q1 q2 -> delegates dx a q1 && delegates dx a q2) ||
             unDisj a (\p1 p2 -> delegates dx p1 b && delegates dx p2 b) ||

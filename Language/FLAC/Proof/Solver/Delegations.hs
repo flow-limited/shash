@@ -6,15 +6,19 @@ import Language.FLAC.Syntax.Runtime
 import Language.FLAC.Proof.Solver.Norm
 import Language.FLAC.Proof.Solver.ActsFor
 
+import Data.Text (Text)
 import Data.Map as M ( Map, foldlWithKey, empty, fromList, unionWith
                      , findWithDefault, union, keys, toList, mapWithKey
                      , keysSet, elems, lookup, singleton, insert)
 import UniqSet       (UniqSet, unionManyUniqSets, emptyUniqSet, unionUniqSets,
                        unitUniqSet, nonDetEltsUniqSet)
-import Unique (Uniquable(..))
+import Unique (Uniquable(..), mkUniqueGrimily)
 import qualified Data.Set as S    (Set, union, empty, singleton, notMember, toList)
 import Data.List                  (partition)
+import qualified Data.Binary as B
 
+instance Uniquable Text where
+  getUnique = mkUniqueGrimily . B.decode . B.encode
 
 data ActsForCt v s = AFCt { af :: (Norm v s, Norm v s) }
 
@@ -38,6 +42,14 @@ data SearchResult v s
   = Win                           -- ^ Two terms are equal
   | Lose (ActsForCt_int v s)       -- ^ Cannot satisfy this constraint
   | ChangeBounds [(v, JNorm v s)] -- ^ Two terms are only equal if the given substitution holds
+
+inferDelegations :: (Text -> Bool) ->
+  [(Prin, Prin)] -> [(Prin, Prin)] -> Maybe (Map Text Prin)
+inferDelegations touchable givens wanteds = case solverResult of
+  Impossible _ -> Nothing
+  Solved (lower, _) -> Just $ fmap jToPrin lower
+  where solverResult = solveConstraints touchable (map toAf givens) (map toAf wanteds)
+        toAf (p,q) = AFCt (toNorm p, toNorm q)
 
 solveConstraints ::
              forall v s. (Uniquable v, Ord v, Ord s) =>

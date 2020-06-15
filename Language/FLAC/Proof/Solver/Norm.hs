@@ -5,8 +5,44 @@ module Language.FLAC.Proof.Solver.Norm where
 -- External
 import Data.Either   (partitionEithers, isLeft)
 import Data.List     (union, nub, sort)
+import Data.Text     (Text)
+import Language.FLAC.Syntax.Runtime
 --import Control.Monad.Fix
 --import Data.Graph    (graphFromEdges, reachable, vertices)
+
+pttp :: Prin -> TypePrin Text Text
+pttp (Raw x) = PT_Name x
+pttp (PVar x) = PT_Var x
+pttp Top = PT_Top
+pttp Bot = PT_Bot
+pttp (Integ p) = PT_Integ (pttp p)
+pttp (Conf p) = PT_Conf (pttp p)
+pttp (Conj p q) = PT_Conj (pttp p) (pttp q)
+pttp (Disj p q) = PT_Disj (pttp p) (pttp q)
+pttp (Voice p) = PT_Voice (pttp p)
+pttp (Eye p) = PT_Eye (pttp p)
+
+tptp :: TypePrin Text Text -> Prin
+tptp (PT_Name x) = Raw x
+tptp (PT_Var x) = PVar x
+tptp PT_Top = Top
+tptp PT_Bot = Bot
+tptp (PT_Integ p) = Integ (tptp p)
+tptp (PT_Conf p) = Conf (tptp p)
+tptp (PT_Conj p q) = Conj (tptp p) (tptp q)
+tptp (PT_Disj p q) = Disj (tptp p) (tptp q)
+tptp (PT_Voice p) = Voice (tptp p)
+tptp (PT_Eye p) = Eye (tptp p)
+tptp (PT_Uninterp s) = PVar s -- TODO: check this
+
+toNorm :: Prin -> Norm Text Text
+toNorm = normPrin . pttp
+
+toPrin :: Norm Text Text -> Prin
+toPrin = tptp . reifyNorm
+
+jToPrin :: JNorm Text Text -> Prin
+jToPrin = tptp . reifyJNorm
 
 {-| Base principals -}
 data Base v s
